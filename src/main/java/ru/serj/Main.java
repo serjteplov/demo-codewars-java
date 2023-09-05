@@ -1,49 +1,64 @@
 package ru.serj;
 
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.stream.Stream;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class Main {
     public static void main(String[] args) {
 
-        String input1 = "[9, 9, 4, 8, 9, 9]";
-        String input2 = "[9, 9, 6]";
+        int manNumber = 2;
+        int meetNumber = 2;
 
-        input1 = input1.substring(1, input1.length() - 1);
-        input2 = input2.substring(1, input2.length() - 1);
-        int[] arr1 = Stream.of(input1.split(", ")).mapToInt(Integer::parseInt).toArray();
-        int[] arr2 = Stream.of(input2.split(", ")).mapToInt(Integer::parseInt).toArray();
-        int l1 = arr1.length;
-        int l2 = arr2.length;
-        int[] arr3 = new int[Math.max(l1, l2) + 1];
-        int l3 = arr3.length;
+        ArrayList<int[]> interv = new ArrayList<>();
+        int[] ints = {10,250};
+        interv.add(ints);
 
-        for (int i = l3 - 2; i >= 0; i--) {
-            int one = i > l1 - 1 ? 0 : arr1[i];
-            int two = i > l2 - 1 ? 0 : arr2[i];
-            arr3[l3 - 2 - i] = one + two;
-        }
+        int[] applicate1 = {8, 20};
+        int[] applicate2 = {15, 30};
+        int[] applicate3 = {110, 160};
+        int[] applicate4 = {222, 233};
+        int[] applicate5 = {244, 246};
+        int[] applicate6 = {240, 244};
 
-        int vume = 0;
-        for (int i = 0; i <= l3 - 1; i++) {
-            arr3[i] += vume;
-            vume = arr3[i] / 10;
-            if (vume > 0) {
-                arr3[i] = arr3[i] % 10;
-            }
-        }
-        if (arr3[l3 - 1] == 0) {
-            arr3 = Arrays.copyOf(arr3, l3 - 1);
-            l3--;
-        }
-        for (int i = 0; i <= (l3 / 2) - 1; i++) {
-            arr3[i] += arr3[l3 - 1 - i];
-            arr3[l3 - 1 - i] = arr3[i] - arr3[l3 - 1 - i];
-            arr3[i] = arr3[i] - arr3[l3 - 1 - i];
-        }
+        List<int[]> applicates = new ArrayList<>();
+        applicates.add(applicate1);
+        applicates.add(applicate2);
+        applicates.add(applicate3);
+        applicates.add(applicate4);
+        applicates.add(applicate5);
+        applicates.add(applicate6);
 
-        System.out.println(Arrays.toString(arr1));
-        System.out.println(Arrays.toString(arr2));
-        System.out.println(Arrays.toString(arr3));
+        long start = System.currentTimeMillis();
+        List<int[]> list1 = intersect(interv.get(0), applicate1);
+        for (int i = 1; i <= applicates.size() - 1; i++) {
+            int[] app = applicates.get(i);
+            list1 = list1.stream().flatMap(ints1 -> intersect(ints1, app).stream()).collect(Collectors.toList());
+        }
+        long finish = System.currentTimeMillis();
+        long timeElapsed = finish - start;
+
+        list1.forEach(a -> System.out.println(Arrays.toString(a)));
+        System.out.println("timeElapsed (millis) = " + timeElapsed);
+    }
+
+    public static List<int[]> intersect(int[] input, int[] excluder) {
+        List<int[]> minires = new ArrayList<>();
+
+        int c1 = input[0];
+        int c2 = excluder[0];
+        int[] arr1 = {c1, c2};
+
+        int c3 = excluder[1];
+        int c4 = input[1];
+        int[] arr2 = {c3, c4};
+
+        if (c2 > c1 && c2 < c4) minires.add(arr1);
+        if (c3 < c4 && c3 > c1) minires.add(arr2);
+        if (c2 < c1 && c3 < c1) minires.add(input);
+        if (c2 > c4 && c3 > c4) minires.add(input);
+
+        return minires.size() == 0 ? List.of(new int[2]) : minires;
     }
 }
