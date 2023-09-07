@@ -1,64 +1,62 @@
 package ru.serj;
 
-import java.util.ArrayList;
+
 import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
 
 public class Main {
+    private static final int POLOSA = 3;
+    private static final int TARGET = 6;
+
     public static void main(String[] args) {
-
-        int manNumber = 2;
-        int meetNumber = 2;
-
-        ArrayList<int[]> interv = new ArrayList<>();
-        int[] ints = {10,250};
-        interv.add(ints);
-
-        int[] applicate1 = {8, 20};
-        int[] applicate2 = {15, 30};
-        int[] applicate3 = {110, 160};
-        int[] applicate4 = {222, 233};
-        int[] applicate5 = {244, 246};
-        int[] applicate6 = {240, 244};
-
-        List<int[]> applicates = new ArrayList<>();
-        applicates.add(applicate1);
-        applicates.add(applicate2);
-        applicates.add(applicate3);
-        applicates.add(applicate4);
-        applicates.add(applicate5);
-        applicates.add(applicate6);
-
-        long start = System.currentTimeMillis();
-        List<int[]> list1 = intersect(interv.get(0), applicate1);
-        for (int i = 1; i <= applicates.size() - 1; i++) {
-            int[] app = applicates.get(i);
-            list1 = list1.stream().flatMap(ints1 -> intersect(ints1, app).stream()).collect(Collectors.toList());
+        boolean[][] obst = new boolean[TARGET+1][POLOSA+2];
+        for (int i = 0; i <= TARGET; i++) {
+            obst[i][0] = true;
+            obst[i][POLOSA+1] = true;
         }
-        long finish = System.currentTimeMillis();
-        long timeElapsed = finish - start;
+        obst[1][1] = true;
+        obst[2][1] = true;
+        obst[2][2] = true;
+        obst[3][2] = true;
+        obst[3][3] = true;
+        obst[4][1] = true;
+        obst[4][2] = true;
+        obst[4][3] = true;
+        obst[5][1] = true;
+        obst[5][2] = true;
 
-        list1.forEach(a -> System.out.println(Arrays.toString(a)));
-        System.out.println("timeElapsed (millis) = " + timeElapsed);
+        for (int i = 0; i <= POLOSA+1; i++) System.out.print("  " + i + "    ");
+        System.out.println();
+        for (int i = TARGET; i >= 0; i--) System.out.println(i + Arrays.toString(obst[i]));
+
+        System.out.println("recursive = " + recur(obst, 0, 2));
+        boolean[] firstCheck = new boolean[]{false, true, true, true, false};
+        System.out.println("iterative = " + iterat(obst, firstCheck));
     }
 
-    public static List<int[]> intersect(int[] input, int[] excluder) {
-        List<int[]> minires = new ArrayList<>();
+    public static int recur(boolean[][] obst, int i, int j) {
+        if (i == TARGET) return i;
+        int max1 = !obst[i+1][j-1]                                    ? recur(obst, i+1, j-1) : 0;
+        int max2 = !obst[i+1][j]    && max1 < TARGET                  ? recur(obst, i+1, j)     : 0;
+        int max3 = !obst[i+1][j+1]  && max1 < TARGET && max2 < TARGET ? recur(obst, i+1, j+1) : 0;
+        int tsarMax = Math.max(max1, Math.max(max2, max3));
+        return tsarMax == 0 ? i : tsarMax;
+    }
 
-        int c1 = input[0];
-        int c2 = excluder[0];
-        int[] arr1 = {c1, c2};
+    public static int iterat(boolean[][] obst, boolean[] lineToCheck) {
+        for (int i = 0; i < obst.length-1; i++) {
 
-        int c3 = excluder[1];
-        int c4 = input[1];
-        int[] arr2 = {c3, c4};
+            boolean[] temp = new boolean[5];
+            for (int k = 1; k <= POLOSA; k++) {
+                if (lineToCheck[k] && !obst[i + 1][k]) {
+                    temp[k] = true;
+                    temp[k+1] = true;
+                    temp[k-1] = true;
+                }
+            }
 
-        if (c2 > c1 && c2 < c4) minires.add(arr1);
-        if (c3 < c4 && c3 > c1) minires.add(arr2);
-        if (c2 < c1 && c3 < c1) minires.add(input);
-        if (c2 > c4 && c3 > c4) minires.add(input);
-
-        return minires.size() == 0 ? List.of(new int[2]) : minires;
+            if (!temp[1] && !temp[2] && !temp[3]) return i;
+            lineToCheck = Arrays.copyOf(temp, POLOSA + 2);
+        }
+        return obst.length-1;
     }
 }
