@@ -16,6 +16,7 @@ public class Main {
         Integer[] cn = {4, 4, 12, 4, 5};
         Integer[] division = new Integer[N];
 
+
         for (int i = 0; i <= l - 1; i++) {
             division[i] = (int) Math.ceil((float)cn[i] / (k+1));
         }
